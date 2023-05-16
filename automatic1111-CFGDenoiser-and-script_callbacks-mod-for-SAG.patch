@@ -5,8 +5,7 @@ Subject: [PATCH] CFGDenoiser and script_callbacks mod for SAG
 
 ---
  modules/script_callbacks.py       | 34 +++++++++++++++++++++++++++++++
- modules/sd_samplers_kdiffusion.py |  7 ++++++-
- 2 files changed, 40 insertions(+), 1 deletion(-)
+ 1 files changed, 34 insertions(+), 0 deletion(-)
 
 diff --git a/modules/script_callbacks.py b/modules/script_callbacks.py
 index 07911876..d3d3df14 100644
@@ -81,38 +80,3 @@ index 07911876..d3d3df14 100644
  def on_before_component(callback):
      """register a function to be called before a component is created.
      The callback is called with arguments:
-diff --git a/modules/sd_samplers_kdiffusion.py b/modules/sd_samplers_kdiffusion.py
-index e9f08518..6ff55ba6 100644
---- a/modules/sd_samplers_kdiffusion.py
-+++ b/modules/sd_samplers_kdiffusion.py
-@@ -9,6 +9,7 @@ from modules.shared import opts, state
- import modules.shared as shared
- from modules.script_callbacks import CFGDenoiserParams, cfg_denoiser_callback
- from modules.script_callbacks import CFGDenoisedParams, cfg_denoised_callback
-+from modules.script_callbacks import AfterCFGCallbackParams, cfg_after_cfg_callback
- 
- samplers_k_diffusion = [
-     ('Euler a', 'sample_euler_ancestral', ['k_euler_a', 'k_euler_ancestral'], {}),
-@@ -146,7 +147,7 @@ class CFGDenoiser(torch.nn.Module):
- 
-             x_out[-uncond.shape[0]:] = self.inner_model(x_in[-uncond.shape[0]:], sigma_in[-uncond.shape[0]:], cond=make_condition_dict([uncond], image_cond_in[-uncond.shape[0]:]))
- 
--        denoised_params = CFGDenoisedParams(x_out, state.sampling_step, state.sampling_steps)
-+        denoised_params = CFGDenoisedParams(x_out, state.sampling_step, state.sampling_steps, self.inner_model)
-         cfg_denoised_callback(denoised_params)
- 
-         devices.test_for_nans(x_out, "unet")
-@@ -164,6 +165,10 @@ class CFGDenoiser(torch.nn.Module):
-         if self.mask is not None:
-             denoised = self.init_latent * self.mask + self.nmask * denoised
- 
-+        after_cfg_callback_params = AfterCFGCallbackParams(denoised, state.sampling_step, state.sampling_steps)
-+        cfg_after_cfg_callback(after_cfg_callback_params)
-+        if after_cfg_callback_params.output_altered:
-+            denoised = after_cfg_callback_params.x
-         self.step += 1
- 
-         return denoised
--- 
-2.40.0
-

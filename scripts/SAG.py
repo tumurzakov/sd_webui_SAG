@@ -29,6 +29,11 @@ def default(val, d):
         return val
     return d() if isfunction(d) else d
 
+class SAGUnit:
+    self.enabled = True
+    self.scale = 0.7
+    self.mask_threshold = 1.0
+
 class LoggedSelfAttention(nn.Module):
     def __init__(self, query_dim, context_dim=None, heads=8, dim_head=64, dropout=0.):
         super().__init__()
@@ -255,7 +260,18 @@ class Script(scripts.Script):
 
 
     def process(self, p: StableDiffusionProcessing, *args, **kwargs):
-        enabled, scale, mask_threshold = args
+
+        enabled, scale, mask_threshold = [False, 0.75, 1.0]
+
+        if len(args) == 3:
+            enabled, scale, mask_threshold = args
+
+        for unit in p.script_args:
+            if isinstance(unit, SAGUnit):
+                enabled = unit.enabled
+                scale = unit.scale
+                mask_threshold = unit.mask_threshold
+
         global sag_enabled, sag_mask_threshold
         if enabled:
 
@@ -290,7 +306,17 @@ class Script(scripts.Script):
         return
 
     def postprocess(self, p, processed, *args):
-        enabled, scale, sag_mask_threshold = args
+        enabled, scale, mask_threshold = [False, 0.75, 1.0]
+
+        if len(args) == 3:
+            enabled, scale, mask_threshold = args
+
+        for unit in p.script_args:
+            if isinstance(unit, SAGUnit):
+                enabled = unit.enabled
+                scale = unit.scale
+                mask_threshold = unit.mask_threshold
+
         if enabled:
             # restore original self attention module forward function
             attn_module = shared.sd_model.model.diffusion_model.middle_block._modules['1'].transformer_blocks._modules[
