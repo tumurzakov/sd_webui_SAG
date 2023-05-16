@@ -30,9 +30,10 @@ def default(val, d):
     return d() if isfunction(d) else d
 
 class SAGUnit:
-    self.enabled = True
-    self.scale = 0.7
-    self.mask_threshold = 1.0
+    def __init__(self, enabled=False, scale=0.75, mask_threshold=1.0):
+        self.enabled = enabled
+        self.scale = scale
+        self.mask_threshold = mask_threshold
 
 class LoggedSelfAttention(nn.Module):
     def __init__(self, query_dim, context_dim=None, heads=8, dim_head=64, dropout=0.):
