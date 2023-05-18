@@ -268,7 +268,7 @@ class Script(scripts.Script):
             enabled, scale, mask_threshold = args
 
         for unit in p.script_args:
-            if isinstance(unit, SAGUnit):
+            if "SAGUnit" in type(unit).__name__:
                 enabled = unit.enabled
                 scale = unit.scale
                 mask_threshold = unit.mask_threshold
@@ -313,7 +313,7 @@ class Script(scripts.Script):
             enabled, scale, mask_threshold = args
 
         for unit in p.script_args:
-            if isinstance(unit, SAGUnit):
+            if "SAGUnit" in type(unit).__name__:
                 enabled = unit.enabled
                 scale = unit.scale
                 mask_threshold = unit.mask_threshold
