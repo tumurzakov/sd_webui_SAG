@@ -275,6 +275,7 @@ class Script(scripts.Script):
 
         global sag_enabled, sag_mask_threshold
         if enabled:
+            print("\n===>SAG enabled")
 
             sag_enabled = True
             sag_mask_threshold = mask_threshold
