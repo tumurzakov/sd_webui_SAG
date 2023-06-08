@@ -262,6 +262,12 @@ class Script(scripts.Script):
 
     def process(self, p: StableDiffusionProcessing, *args, **kwargs):
 
+        try:
+            if p.sag_enabled != None:
+                return
+        except:
+            pass
+
         enabled, scale, mask_threshold = [False, 0.75, 1.0]
 
         if len(args) == 3:
@@ -277,6 +283,7 @@ class Script(scripts.Script):
         if enabled:
             print("\n===>SAG enabled")
 
+            p.sag_enabled = True
             sag_enabled = True
             sag_mask_threshold = mask_threshold
             global current_sag_guidance_scale
